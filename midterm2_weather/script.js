@@ -1,180 +1,192 @@
-const apiKey = 'f6cca55faf87dc1968690c53c3d3c82c';
-const cityInput = document.getElementById('city-input');
-const currentWeatherDiv = document.getElementById('current-weather');
-const forecastDiv = document.getElementById('forecast');
-const suggestionsDiv = document.getElementById('suggestions');
-const startScreen = document.getElementById('start-screen');
-const next = document.getElementById('next');
-const startbutton = document.getElementById('start-button');
-const clearButton = document.getElementById('clear-button');
-startbutton.addEventListener('click', starting);
+  const apiKey = '451f0c061bb6459e81503921982149c7';
+  const searchInput = document.getElementById('search-input');
+  const recipeGrid = document.getElementById('recipe-grid');
+  const modal = document.getElementById('recipe-modal');
+  const favoritesGrid = document.getElementById('favorites-grid');
+  const dropdown = document.getElementById('suggestions');
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-function starting(){
-    startScreen.classList.add('hidden');
-    next.classList.remove('hidden');
-};
-
-
-//
-function showicon(){
-  const name = document.querySelector(".username").value;
-  const img = document.querySelector("img");
-  if(username.length <= 0) document.body.classList.remove(".active");
-  else document.body.classList.add("active");
-  img.addEventListener("click", () => {
-    document.querySelector(".username").value="";
-    document.body.classList.classList.remove("active");
-  });
-}
-
-//  изменение температуры (Цельсий/Фаренгейт)
-document.querySelectorAll('input[name="unit"]').forEach(input => {
-  input.addEventListener('change', () => {
-    if (cityInput.value) getWeather(cityInput.value);
-  });
-});
-
-
-//показывает кнопку очистить 
-cityInput.addEventListener('input', () => {
-    if (cityInput.value.length > 0) {
-        clearButton.classList.remove('hidden');
-    } else {
-        clearButton.classList.add('hidden');
+//убирает предложения если нажать где то не нажать на одну из предложений
+  document.addEventListener('click', (event) => {
+    if(check(event.target)){
+      dropdown.classList.remove('hidden');
     }
-});
+    if (!searchInput.contains(event.target) && !dropdown.contains(event.target)) {
+      dropdown.classList.add('hidden');
+    }
+  
+    
+  });
 
-//очищает инпут
-clearButton.addEventListener('click', () => {
-    cityInput.value = '';
-    clearButton.classList.add('hidden');
-    cityInput.focus(); // Вернуть фокус в поле ввода
-});
+  let rec = 0;
 
 
-
-// Получение предложений по названию города
-cityInput.addEventListener('input', async () => {
-  const query = cityInput.value;
-  if (query.length > 2) {
-    const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${apiKey}`);
-    const cities = await response.json();
-    displaySuggestions(cities);
+  //проверяет есть ли что то в запросе или длина отличается
+  function check(e){
+    if(searchInput.value  .length === 0){
+      rec = searchInput.length;
+      return true;
+    }
+    else{
+      if(rec != searchInput.length){
+        return false;
+      }
+      else return true;
+    }
   }
-});
 
-// Отображение предложений
-function displaySuggestions(cities) {
-  suggestionsDiv.innerHTML = '';
-  cities.forEach(city => {
+
+  //получает данные с базы данных и оптравляет в другой метод если длина запроса достигает 3 и более
+  searchInput.addEventListener('input', async () => {
+    const query = searchInput.value;
+    if (query.length > 2) {
+      const response = await fetch(`https://api.spoonacular.com/recipes/autocomplete?query=${query}&apiKey=${apiKey}`);
+      const suggestions = await response.json();
+      displaySuggestions(suggestions);
+    }
+  });
+
+
+//показывает предложения по запросу
+function displaySuggestions(suggestions) {
+  const dropdown = document.getElementById('suggestions');
+  dropdown.innerHTML = '';
+  dropdown.classList.remove('hidden'); // Показываем выпадающий список
+
+  suggestions.forEach(suggestion => {
     const item = document.createElement('div');
-    item.textContent = `${city.name}, ${city.country}`;
+    item.textContent = suggestion.title;
     item.onclick = () => {
-      cityInput.value = `${city.name}, ${city.country}`;
-      getWeather(city.name);
-      suggestionsDiv.innerHTML = '';
+      loadRecipes(suggestion.title);
+      dropdown.classList.add('hidden'); // Скрываем после выбора предложения
     };
-    suggestionsDiv.appendChild(item);
+    dropdown.appendChild(item);
   });
 }
 
-// Получение текущей погоды и прогноза
-async function getWeather(city) {
 
-  let lastCity = city;
-  let lastCoords = null;
-
-  const unit = document.querySelector('input[name="unit"]:checked').value;
-  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${unit}&appid=${apiKey}`;
-  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${unit}&appid=${apiKey}`;
-
-  try {
-    const currentWeatherResponse = await fetch(currentWeatherUrl);
-    const currentWeatherData = await currentWeatherResponse.json();
-    displayCurrentWeather(currentWeatherData);
-
-    const forecastResponse = await fetch(forecastUrl);
-    const forecastData = await forecastResponse.json();
-    displayForecast(forecastData);
-  } catch (error) {
-    alert('City not found');
+  //показывает результаты запроса
+  async function loadRecipes(query) {
+    const response = await fetch(`https://api.spoonacular.com/recipes/complexSearch?query=${query}&apiKey=${apiKey}`);
+    const data = await response.json();
+    recipeGrid.innerHTML = '';
+    data.results.forEach(recipe => createRecipeCard(recipe));
   }
-}
 
-// Отображение текущей погоды
-function displayCurrentWeather(data) {
-  const weatherHtml = `
-    <h2>${data.name}, ${data.sys.country}</h2>
-    <h3>${data.weather[0].description}</h3>
-    <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="${data.weather[0].description}">
-    <p>Temperature: ${data.main.temp}°</p>
-    <p>Humidity: ${data.main.humidity}%</p>
-    <p>Wind Speed: ${data.wind.speed} m/s</p>
-  `;
-  currentWeatherDiv.innerHTML = weatherHtml;
-}
 
-// Отображение прогноза на 5 дней
-function displayForecast(data) {
-  forecastDiv.innerHTML = '<h3>5-Day Forecast:</h3>';
-  const dailyForecast = data.list.filter(item => item.dt_txt.includes('12:00:00'));
-  dailyForecast.forEach(day => {
-    const forecastHtml = `
-      <div class="forecast-day">
-        <h4>${new Date(day.dt_txt).toLocaleDateString(undefined, { weekday: 'short' })}</h4>
-        <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png" alt="${day.weather[0].description}">
-        <p>High: \n ${day.main.temp_max}°</p>
-        <p>Low: \n ${day.main.temp_min}°</p>
-      </div>`;
-    forecastDiv.innerHTML += forecastHtml;
-  });
-}
-
-// Получение погоды по геолокации
-function getWeatherByLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-      lastCoords = { latitude, longitude }; 
-      lastCity = null;
-      
-      const unit = document.querySelector('input[name="unit"]:checked').value;
-      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=${unit}&appid=${apiKey}`;
-      const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&units=${unit}&appid=${apiKey}`;
-
-      try {
-        const currentWeatherResponse = await fetch(weatherUrl);
-        const currentWeatherData = await currentWeatherResponse.json();
-        displayCurrentWeather(currentWeatherData);
-
-        const forecastResponse = await fetch(forecastUrl);
-        const forecastData = await forecastResponse.json();
-        displayForecast(forecastData);
-      } catch (error) {
-        alert('Could not retrieve weather data.');
-      }
-    },
-    (error) => {
-      if (error.code === error.PERMISSION_DENIED) {
-        alert('Location access was denied. Please allow location access in your browser settings.');
+  function check(eventTarget) {
+    // Проверяем, пустой ли input или длина изменилась
+    if (searchInput.value.length === 0) {
+      rec = searchInput.value.length;
+      return true;
+    } else {
+      if (rec !== searchInput.value.length) {
+        rec = searchInput.value.length;
+        return false;
       } else {
-        alert('Unable to retrieve your location.');
+        return true;
       }
+    }
+  }
+
+  
+  document.addEventListener('click', (event) => {
+    if (!searchInput.contains(event.target) && !dropdown.contains(event.target)) {
+      dropdown.classList.add('hidden'); 
+    }
+  });
+
+  
+  async function fetchSuggestions(query) {
+    const response = await fetch(`https://api.spoonacular.com/recipes/autocomplete?query=${query}&apiKey=${apiKey}`);
+    const suggestions = await response.json();
+  
+    if (suggestions.length > 0) {
+      displaySuggestions(suggestions);
+    } else {
+      dropdown.classList.add('hidden'); // Скрываем, если предложений нет
+    }
+  }
+  
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value;
+    if (query.length > 2) {
+      fetchSuggestions(query);
+    }
+  });
+  
+
+//создает отдельные карты
+  function createRecipeCard(recipe) {
+    const card = document.createElement('div');
+    card.classList.add('recipe-card');
+    card.innerHTML = `
+      <img src="${recipe.image}" alt="${recipe.title}">
+      <h3>${recipe.title}</h3>
+      <p>Preparation time: ${recipe.readyInMinutes} mins</p>
+      <button onclick="showRecipeDetails(${recipe.id})">View Recipe</button>
+      <button onclick="toggleFavorite(${recipe.id}, '${recipe.title}', '${recipe.image}', ${recipe.readyInMinutes})">
+        ${isFavorite(recipe.id) ? 'Remove from Favorites' : 'Add to Favorites'}
+      </button>
+    `;
+    recipeGrid.appendChild(card);
+  }
+
+
+    //создает модальное окно дл 
+  async function showRecipeDetails(id) {
+    const response = await fetch(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${apiKey}`);
+    const recipe = await response.json();
+    modal.innerHTML = `
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <h2>${recipe.title}</h2>
+      <img src="${recipe.image}" alt="${recipe.title}">
+      <p><strong>Ingredients:</strong></p>
+      <ul>${recipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`)}</ul>
+      <p><strong>Instructions:</strong> ${recipe.instructions || 'No instructions available.'}</p>   `;
+    modal.style.display = 'block';
+  }
+
+  // для закрытии модального окна
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+
+  // для изменения избранных
+  function toggleFavorite(id, title, image, readyInMinutes) {
+    const recipe = { id, title, image, readyInMinutes };
+    if (isFavorite(id)) {
+      favorites = favorites.filter(fav => fav.id !== id);
+    } else {
+      favorites.push(recipe);
+    }
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    displayFavorites();
+    loadRecipes(searchInput.value); 
+  }
+
+  function isFavorite(id) {
+    return favorites.some(fav => fav.id === id);
+  }
+
+  function displayFavorites() {
+    favoritesGrid.innerHTML = '';
+    favorites.forEach(recipe => {
+      const card = document.createElement('div');
+      card.classList.add('recipe-card');
+      card.innerHTML = `
+        <img src="${recipe.image}" alt="${recipe.title}">
+        <h3>${recipe.title}</h3>
+        <p>Preparation time: ${recipe.readyInMinutes} mins</p>
+        <button onclick="toggleFavorite(${recipe.id}, '${recipe.title}', '${recipe.image}', ${recipe.readyInMinutes})">
+          Remove from Favorites
+        </button>
+      `;
+      favoritesGrid.appendChild(card);
     });
-  } else {
-    alert('Geolocation is not supported by this browser.');
   }
-}
 
-
-cityInput.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    event.preventDefault(); 
-    getWeather(cityInput.value); 
-  }
-});
+  displayFavorites();
 
 
 
-let lastCity = null;
-let lastCoords = null;
