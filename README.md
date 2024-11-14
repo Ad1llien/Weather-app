@@ -1,19 +1,22 @@
 # Weather-app
 weather app project for web-front subject
 
-here you can know the weather of each city in the world!
-
-![image](https://github.com/user-attachments/assets/7913a695-b27f-433d-b598-6793e14310c5)
-here is the main page where you can see you favourite receipts or search for another one
+this is an app that show the weather from all cities ib the world!
+![image](https://github.com/user-attachments/assets/868f4e38-a157-4fab-930c-e59b1de84d9b)
 
 
-
-![image](https://github.com/user-attachments/assets/09ecb142-6298-471f-b139-0691f4c56973)
-you can type name for any meal you want and tap enter or click for one of suitable for you suggestion
-
-
-![image](https://github.com/user-attachments/assets/d147f93a-b48c-49ee-90b1-7c4ec3c12881)
-once you queried, you will see search results. You can tap see receipt to see how to cook it or to see other informations related to this meal. Or if you are busy right now, you can add it to favourites to see receipts later. 
+![image](https://github.com/user-attachments/assets/90f26cca-6450-4fc4-835f-13eb4d51f744)
+enther the name
+when you start entering suggestions will appear, if you found necessery to you city just click on it
+![image](https://github.com/user-attachments/assets/b6e73f05-0c91-4c4a-803c-0fee54edfb9c)
 
 
+once you clicked, program will show you the current and forecast weather
+![image](https://github.com/user-attachments/assets/bb74ea23-608c-4eab-a18c-d4d99c754e1d)
 
+you can also change from celsium to farenheit 
+![image](https://github.com/user-attachments/assets/d9ce8c75-103c-4c63-b3e9-67a4cd4a05dd)
+
+
+or if you want to know weather in your position right now, click use my location
+![image](https://github.com/user-attachments/assets/525bc2ec-51f4-42e5-a64d-47ea4e135597)
