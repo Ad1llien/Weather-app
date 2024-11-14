@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Weather App</title>
+</head>
+<body>
+  <div class="hero">
+    <video autoplay loop muted plays-inline  src="/videoplayback (1).webm" class="back-video" type="video/mp4"></video>
+
+    <nav>
+      
+      <img src="/401-logo.png" alt="">
+      <ul>
+        <li><a href="">HOME</a></li>
+        <li><a href="">INTERESTING</a></li>
+        <li><a href="">HOT SEARCHES</a></li>
+        <li><a href="">CONTACT US</a></li>
+      </ul>
+    </nav>
+    <div id="weather-app">
+    <div id="start-screen">
+      <h1>Welcome!</h1>
+      <button id="start-button">Start</button>
+    </div>
+    <div id="next" class="hidden">
+      <div class="input-wrapper">
+        <input type="text" id="city-input" placeholder="Enter city name...">
+        <button id="clear-button" class="clear-button hidden">✕</button>
+      </div>
+      <div id="suggestions"></div>
+      <button onclick="getWeatherByLocation()">Use My Location</button>
+      <div id="unit-toggle">
+        <label>
+          <input type="radio" name="unit" value="metric" checked> °C
+       </label>
+       <label>
+          <input type="radio" name="unit" value="imperial"> °F
+        </label>
+      </div>
+      <div id="current-weather"></div>
+      <div id="forecast"></div>
+    </div> 
+    
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
